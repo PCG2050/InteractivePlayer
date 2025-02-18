@@ -1,0 +1,1 @@
+C:\Users\prith\source\repos\InteractivePlayer\InteractivePlayer\InteractivePlayer.UWP\InteractivePlayer.UWP.csproj;x64

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="InteractivePlayer.MediaPlayerElementPage"
+             xmlns:vlc="clr-namespace:LibVLCSharp.Forms.Shared;assembly=LibVLCSharp.Forms"
+             xmlns:viewModels="clr-namespace:InteractivePlayer.ViewModels">
+    <ContentPage.BindingContext>
+        <viewModels:MediaPlayerElementPageViewModel/>
+    </ContentPage.BindingContext>
+
+    <ContentPage.Content>
+        <Grid>
+            <vlc:MediaPlayerElement MediaPlayer="{Binding MediaPlayer}"
+                                    LibVLC="{Binding LibVLC}"/>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

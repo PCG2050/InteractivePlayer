@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "dgSpecHash": "OFDX2GlxDfs=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\prith\\source\\repos\\InteractivePlayer\\InteractivePlayer\\InteractivePlayer.iOS\\InteractivePlayer.iOS.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\prith\\.nuget\\packages\\libvlcsharp\\3.9.2\\libvlcsharp.3.9.2.nupkg.sha512",
+    "C:\\Users\\prith\\.nuget\\packages\\libvlcsharp.forms\\3.9.2\\libvlcsharp.forms.3.9.2.nupkg.sha512",
+    "C:\\Users\\prith\\.nuget\\packages\\system.numerics.vectors\\4.5.0\\system.numerics.vectors.4.5.0.nupkg.sha512",
+    "C:\\Users\\prith\\.nuget\\packages\\videolan.libvlc.uwp\\3.3.2\\videolan.libvlc.uwp.3.3.2.nupkg.sha512",
+    "C:\\Users\\prith\\.nuget\\packages\\xamarin.essentials\\1.7.0\\xamarin.essentials.1.7.0.nupkg.sha512",
+    "C:\\Users\\prith\\.nuget\\packages\\xamarin.forms\\5.0.0.2196\\xamarin.forms.5.0.0.2196.nupkg.sha512"
+  ],
+  "logs": []
+}
