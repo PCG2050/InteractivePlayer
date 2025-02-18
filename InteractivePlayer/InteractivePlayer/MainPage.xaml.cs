@@ -1,14 +1,15 @@
-﻿using System;
+﻿using InteractivePlayer.Model;
+using LibVLCSharp.Forms.Shared;
+using LibVLCSharp.Shared;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Forms;
-using LibVLCSharp.Shared;
-using LibVLCSharp.Forms.Shared;
-using System.IO;
-using InteractivePlayer.Model;
 
 namespace InteractivePlayer
 {
@@ -102,17 +103,32 @@ namespace InteractivePlayer
             {
                 _lastQuestionTimestamp = _questionGroups.Keys.FirstOrDefault(ts => _currentQuestionIndex[ts] < _questionGroups[ts].Count);
             }
-            _mediaPlayer.Pause();
+
+            // Stop and release the MediaPlayer
+            _mediaPlayer.Stop();
+            _mediaPlayer.Dispose();
+            _mediaPlayer = null;
         }
 
         private void OnAppResuming(string sender)
         {
+            if (_libVLC == null)
+            {
+                Core.Initialize();
+                _libVLC = new LibVLC();
+            }
+
+            if (_mediaPlayer == null)
+            {
+                _mediaPlayer = new MediaPlayer(_libVLC);
+                VideoView.MediaPlayer = _mediaPlayer;
+            }
+
             if (_lastPlaybackPosition != TimeSpan.Zero)
             {
-                // Recreate Media and attach to VideoView to fix black screen issue
                 _mediaPlayer.Media = new Media(_libVLC, new Uri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"));
-                VideoView.MediaPlayer = _mediaPlayer; // 🔴 IMPORTANT: Reassign MediaPlayer
-
+                _mediaPlayer.Media.AddOption(":clock-jitter=0"); // Add this line to fix timestamp conversion issue
+                _mediaPlayer.Media.AddOption(":clock-synchro=0"); // Add this line to fix timestamp conversion issue
                 SeekTo(_lastPlaybackPosition);
 
                 if (_isQuestionVisible)
@@ -125,6 +141,7 @@ namespace InteractivePlayer
                 }
             }
         }
+
 
         // Removed duplicate OnAppResuming method
 
@@ -178,6 +195,7 @@ namespace InteractivePlayer
             Device.BeginInvokeOnMainThread(() =>
             {
                 ElapsedTimeLabel.Text = string.Format("{0:mm\\:ss}", TimeSpan.FromMilliseconds(_mediaPlayer.Time));
+                DurationSlider.Value = _mediaPlayer.Position * 100;
                 // Check if it's time for questions
                 foreach (var timestamp in _questionGroups.Keys)
                 {

@@ -2,6 +2,7 @@
 /InteractivePlayer/InteractivePlayer/obj/Debug
 /InteractivePlayer/InteractivePlayer.Android/obj
 /InteractivePlayer/InteractivePlayer/obj
+*.dll
 /InteractivePlayer/InteractivePlayer.Android/bin
 /InteractivePlayer/InteractivePlayer/obj/Debug
 /InteractivePlayer/InteractivePlayer/obj
