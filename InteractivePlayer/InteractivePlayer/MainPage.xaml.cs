@@ -108,10 +108,12 @@ namespace InteractivePlayer
         {
             _lastPlaybackPosition = TimeSpan.FromMilliseconds(_mediaPlayer.Time);
             _isQuestionVisible = QuestionPopup.IsVisible;
+
             if (_isQuestionVisible)
             {
                 _lastQuestionTimestamp = _questionGroups.Keys.FirstOrDefault(ts => _currentQuestionIndex[ts] < _questionGroups[ts].Count);
             }
+
             _mediaPlayer.Pause();
         }
 
@@ -119,22 +121,53 @@ namespace InteractivePlayer
         {
             if (_lastPlaybackPosition != TimeSpan.Zero)
             {
-                // Recreate Media and attach to VideoView to fix black screen issue
-                _mediaPlayer.Media = new Media(_libVLC, new Uri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"));
-                VideoView.MediaPlayer = _mediaPlayer; // 🔴 IMPORTANT: Reassign MediaPlayer
+                // Fully recreate MediaPlayer to prevent the blank screen issue
+                _mediaPlayer.Dispose();  // Dispose the old player
+                _mediaPlayer = new MediaPlayer(_libVLC);  // Create a new one
 
-                SeekTo(_lastPlaybackPosition);
+                // Reattach VideoView
+                VideoView.MediaPlayer = _mediaPlayer;
 
-                if (_isQuestionVisible)
+                // Reload the video
+                var media = new Media(_libVLC, new Uri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"));
+                _mediaPlayer.Media = media;
+
+                // Seek back to last position
+                _mediaPlayer.Play();
+                _mediaPlayer.PositionChanged += MediaPlayerPositionChanged;
+                // Wait briefly to let media load, then seek to the last position
+                Device.BeginInvokeOnMainThread(async () =>
                 {
-                    ShowNextQuestion(_lastQuestionTimestamp);
-                }
-                else
+                    await Task.Delay(500); // Wait for the media to load
+                    SeekTo(_lastPlaybackPosition);
+                    // Update the ElapsedTimeLabel text with the last playback position
+                    ElapsedTimeLabel.Text = string.Format("{0:mm\\:ss}", _lastPlaybackPosition);
+                });
+
+                // Ensure slider is updated to the correct position
+                MoviePosition = (float)(_lastPlaybackPosition.TotalMilliseconds / _mediaPlayer.Length * 100);
+
+                // Check if it's time to show any questions upon resume
+                ShowQuestionsIfNeeded();
+            }
+        }
+
+        private void ShowQuestionsIfNeeded()
+        {
+            // Ensure we check whether any questions need to pop up after resuming
+            foreach (var timestamp in _questionGroups.Keys)
+            {
+                if (TimeSpan.FromMilliseconds(_mediaPlayer.Time) >= timestamp && _currentQuestionIndex[timestamp] < _questionGroups[timestamp].Count)
                 {
-                    _mediaPlayer.Play();
+                    _mediaPlayer.Pause();  // Pause video before showing the question
+                    ShowNextQuestion(timestamp);
+                    break;
                 }
             }
         }
+
+
+
 
         // Removed duplicate OnAppResuming method
 
@@ -187,19 +220,25 @@ namespace InteractivePlayer
 
             Device.BeginInvokeOnMainThread(() =>
             {
+                // Update elapsed time label
                 ElapsedTimeLabel.Text = string.Format("{0:mm\\:ss}", TimeSpan.FromMilliseconds(_mediaPlayer.Time));
+
                 // Check if it's time for questions
                 foreach (var timestamp in _questionGroups.Keys)
                 {
                     if (TimeSpan.FromMilliseconds(_mediaPlayer.Time) >= timestamp && _currentQuestionIndex[timestamp] < _questionGroups[timestamp].Count)
                     {
-                        _mediaPlayer.SetPause(false);
+                        _mediaPlayer.Pause(); // Pause the media before showing the question
                         ShowNextQuestion(timestamp);
                         break;
                     }
                 }
+
+                // Update the slider position
+                MoviePosition = (float)(_mediaPlayer.Time / _mediaPlayer.Length * 100);
             });
         }
+
 
         private void MediaPlayer_EncounteredError(object sender, EventArgs e)
         {
@@ -264,39 +303,39 @@ namespace InteractivePlayer
             var group2Time = TimeSpan.FromSeconds(20);
 
             _questionGroups[group1Time] = new List<Question>
+{
+            new Question
             {
-                new Question
-                {
-                    QuestionText = "What is the capital of France?",
-                    Options = new List<string> { "Paris", "London", "Berlin", "Madrid" },
-                    CorrectAnswer = "Paris"
-                },
-                new Question
-                {
-                    QuestionText = "Who won the 2018 FIFA World Cup?",
-                    Options = new List<string> { "Brazil", "Germany", "Spain", "Argentina" },
-                    CorrectAnswer = "Germany"
-                },
-                new Question
-                {
-                    QuestionText = "What is the name of the famous painting by Leonardo da Vinci?",
-                    Options = new List<string> { "Mona Lisa", "The Last Supper", "The Starry Night", "The Creation of Adam" },
-                    CorrectAnswer = "Mona Lisa"
-                }
-            };
+                QuestionText = "<p>What is the <b>capital</b> of France kjsdhfjaskdjbfdamf,fkghlakfngaklgkdfsng lalfjdngadkjgldfbgandfgalgnbfganldfga mfndkg alfgafdg?</p>",
+                Options = new List<string> { "Paris", "London is the capital of the world and is the world's' responsibility for protecting the environment", "Berlin", "Madrid" },
+                CorrectAnswer = "Paris"
+            },
+            new Question
+            {
+                QuestionText ="<p>What is the <b>capital</b> of France?</p><img src='https://cdn.pixabay.com/photo/2025/02/07/18/31/peacock-9390809_1280.jpg' alt='Paris' width='200' height='150' />",
+                Options = new List<string> { "Brazil", "Germany", "Spain", "Argentina" },
+                CorrectAnswer = "Germany"
+            },
+            new Question
+            {
+                QuestionText = "<p>What is the name of the famous painting by <u>Leonardo da Vinci</u>?</p>",
+                Options = new List<string> { "Mona Lisa", "The Last Supper", "The Starry Night", "The Creation of Adam" },
+                CorrectAnswer = "Mona Lisa"
+            }
+        };
 
             _questionGroups[group2Time] = new List<Question>
             {
                 new Question
                 {
-                    QuestionText = "Who is the current Prime Minister of Australia?",
+                    QuestionText = "<p>What is the name of the famous painting by <u>Leonardo da Vinci</u>?</p>",
                     Options = new List<string> { "Joe Biden", "George Osborne", "David Cameron", "Australian Labor Party Leader" },
                     CorrectAnswer = "David Cameron"
                 },
                 new Question
                 {
-                    QuestionText = "What is the capital city of Sweden?",
-                    Options = new List<string> { "Stockholm", "Copenhagen", "London", "Berlin" },
+                    QuestionText = "<p>Who won the <i>2018 FIFA World Cup</i>?</p>",
+                    Options = new List<string> { "Stockholm is the biggest capital in the world", "Copenhagen", "London", "Berlin" },
                     CorrectAnswer = "Stockholm"
                 },
             };
@@ -331,8 +370,25 @@ namespace InteractivePlayer
                 // Stop video playback
                 _mediaPlayer.Pause();
 
-                // Set question text
-                QuestionTextLabel.Text = question.QuestionText;
+                // Load HTML-formatted question text into the WebView
+                var htmlContent = $@"
+                                    <html>
+                                    <head>
+                                        <style>
+                                            body {{
+                                                font-family: Arial, sans-serif;
+                                                font-size: 16px;
+                                                color: black;
+                                                text-align: center;
+                                            }}
+                                        </style>
+                                    </head>
+                                    <body>
+                                        {question.QuestionText}
+                                    </body>
+                                    </html>";
+
+                QuestionWebView.Source = new HtmlWebViewSource { Html = htmlContent };
 
                 // Clear previous options
                 OptionsContainer.Children.Clear();
@@ -387,4 +443,7 @@ namespace InteractivePlayer
             });
         }
     }
+    
+    
+
 }

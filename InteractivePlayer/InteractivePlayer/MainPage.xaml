@@ -3,35 +3,36 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="InteractivePlayer.MainPage"
              xmlns:shared ="clr-namespace:LibVLCSharp.Forms.Shared;assembly=LibVLCSharp.Forms"
-             xmlns:vlcDemo ="clr-namespace:InteractivePlayer">
+             xmlns:vlcDemo ="clr-namespace:InteractivePlayer"
+             xmlns:local="clr-namespace:InteractivePlayer;assembly=InteractivePlayer">
     <Grid RowDefinitions="*,Auto,Auto,Auto">
 
         <shared:VideoView x:Name="VideoView" Grid.Row="0" Grid.Column="0"/>
         <!--Question-->
         <Frame x:Name="QuestionPopup"
-               IsVisible="False"
-               BackgroundColor="White"
-               Padding="10"
-               Margin="20"
-               CornerRadius="10"
-               VerticalOptions="Center"
-               HorizontalOptions="Center"
-               WidthRequest="300">
+           IsVisible="False"
+           BackgroundColor="White"
+           Padding="10"
+           Margin="20"
+           CornerRadius="10"
+           VerticalOptions="Center"
+           HorizontalOptions="Center"
+           WidthRequest="300">  
             <StackLayout>
-                <Label x:Name="QuestionTextLabel" 
-                       Text="Sample Quesiton" 
-                       FontSize="Medium"
-                       TextColor="Black"
-                       HorizontalTextAlignment="Center"/>
+              
+                <!-- Replace Label with WebView -->
+                <local:CustomWebView x:Name="QuestionWebView"
+                   HorizontalOptions="FillAndExpand"
+                   VerticalOptions="FillAndExpand"/>    
                 <StackLayout x:Name="OptionsContainer"
-                             Spacing="10"></StackLayout>
-                <Label x:Name="CorrectAnswerLabel"
-                       IsVisible="False"
-                       FontSize="16"
-                       TextColor="Green"
-                       HorizontalTextAlignment="Center"/>
-            </StackLayout>            
-        </Frame>        
+                     Spacing="10"></StackLayout>
+                    <Label x:Name="CorrectAnswerLabel"
+               IsVisible="False"
+               FontSize="16"
+               TextColor="Green"
+               HorizontalTextAlignment="Center"/>
+            </StackLayout>
+        </Frame>
 
         <!--<Slider x:Name="VolumeSlider" Maximum="100"
                 Rotation="90"
