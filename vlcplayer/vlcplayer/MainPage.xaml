@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vlc="clr-namespace:LibVLCSharp.Forms.Shared;assembly=LibVLCSharp.Forms"
+             x:Class="vlcplayer.MainPage">
+
+    <Grid x:Name="MainGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <vlc:VideoView x:Name="VideoView"
+                       HorizontalOptions="FillAndExpand"
+                       VerticalOptions="FillAndExpand"/>
+
+        <!-- Video Duration Slider with Tick Marks -->
+        <Grid x:Name="TimeSlider" RowDefinitions="*,*" Margin="0"
+              Grid.Row="1" BackgroundColor="White">
+
+            <AbsoluteLayout>
+                <!-- Question Markers -->
+                <Image x:Name="Marker1" Source="question_marker.png"
+                       WidthRequest="20" HeightRequest="20"
+                       AbsoluteLayout.LayoutBounds="0,1,20,20"
+                       AbsoluteLayout.LayoutFlags="PositionProportional"/>
+                <Image x:Name="Marker2" Source="question_marker.png"
+                       WidthRequest="20" HeightRequest="20"
+                       AbsoluteLayout.LayoutBounds="0,1,20,20"
+                       AbsoluteLayout.LayoutFlags="PositionProportional"/>
+                <!-- Slider -->
+                <Slider x:Name="DurationSlider"
+                        IsEnabled="True"
+                        MaximumTrackColor="SkyBlue"
+                        MinimumTrackColor="Blue"
+                        Maximum="100"  
+                        Value="50"
+                        AbsoluteLayout.LayoutFlags="All"
+                        AbsoluteLayout.LayoutBounds="0,0,1,1"
+                        HeightRequest="30" BackgroundColor="Transparent"/>
+
+
+            </AbsoluteLayout>
+
+            <!-- Time Labels -->
+            <Grid Grid.Row="1" Padding="5">
+                <Label x:Name="ElapsedTimeLabel"
+                       Text="0:00"
+                       HorizontalOptions="Start"/>
+                <Label x:Name="DurationLabel"
+                       Text="0:00"
+                       HorizontalOptions="End"/>
+            </Grid>
+        </Grid>
+
+        <!-- Question Popup -->
+        <Frame x:Name="QuestionPopup"                
+                     IsVisible="False"
+                     BackgroundColor="White" Padding="20"
+                     Margin="10"
+                     CornerRadius="10"
+                     VerticalOptions="CenterAndExpand"
+                     HorizontalOptions="CenterAndExpand"   
+                     
+                     WidthRequest="{Binding QuestionPopupWidth}"
+                     HeightRequest="{Binding QuestionPopupHeight}">
+            <StackLayout VerticalOptions="End">
+                <WebView x:Name="QuestionWebView" HeightRequest="{Binding QuestionWebViewPopupHeight}"/>
+                <StackLayout x:Name="OptionsContainer"/>
+                <Label x:Name="CorrectAnswerLabel" IsVisible="False"
+                   FontSize="16" FontAttributes="Bold"
+                   TextColor="Green"/>
+            </StackLayout>
+        </Frame>
+
+        <!--<Button HorizontalOptions="Start" VerticalOptions="Start"
+                Text="Get Status" Clicked="GetVideoStatus"/>-->
+    </Grid>
+</ContentPage>

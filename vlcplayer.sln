@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.35821.62 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vlcplayer.Android", "vlcplayer\vlcplayer.Android\vlcplayer.Android.csproj", "{BDBEFF65-14CD-4E0A-980F-32C35841212B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vlcplayer.iOS", "vlcplayer\vlcplayer.iOS\vlcplayer.iOS.csproj", "{0394129B-73F2-41CD-A093-204368777A10}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vlcplayer", "vlcplayer\vlcplayer\vlcplayer.csproj", "{1BBBC432-5473-417B-9D35-66FAC5688D30}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BDBEFF65-14CD-4E0A-980F-32C35841212B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDBEFF65-14CD-4E0A-980F-32C35841212B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDBEFF65-14CD-4E0A-980F-32C35841212B}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{BDBEFF65-14CD-4E0A-980F-32C35841212B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDBEFF65-14CD-4E0A-980F-32C35841212B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDBEFF65-14CD-4E0A-980F-32C35841212B}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{0394129B-73F2-41CD-A093-204368777A10}.Debug|Any CPU.ActiveCfg = Debug|iPhone
+		{0394129B-73F2-41CD-A093-204368777A10}.Debug|Any CPU.Build.0 = Debug|iPhone
+		{0394129B-73F2-41CD-A093-204368777A10}.Debug|Any CPU.Deploy.0 = Debug|iPhone
+		{0394129B-73F2-41CD-A093-204368777A10}.Release|Any CPU.ActiveCfg = Release|iPhoneSimulator
+		{0394129B-73F2-41CD-A093-204368777A10}.Release|Any CPU.Build.0 = Release|iPhoneSimulator
+		{0394129B-73F2-41CD-A093-204368777A10}.Release|Any CPU.Deploy.0 = Release|iPhoneSimulator
+		{1BBBC432-5473-417B-9D35-66FAC5688D30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BBBC432-5473-417B-9D35-66FAC5688D30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BBBC432-5473-417B-9D35-66FAC5688D30}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{1BBBC432-5473-417B-9D35-66FAC5688D30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BBBC432-5473-417B-9D35-66FAC5688D30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BBBC432-5473-417B-9D35-66FAC5688D30}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EF11CADC-CFA0-4FEE-B4ED-B2B125838514}
+	EndGlobalSection
+EndGlobal
