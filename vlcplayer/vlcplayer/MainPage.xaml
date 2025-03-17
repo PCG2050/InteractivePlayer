@@ -17,17 +17,8 @@
         <Grid x:Name="TimeSlider" RowDefinitions="*,*" Margin="0"
               Grid.Row="1" BackgroundColor="White">
 
-            <AbsoluteLayout>
-                <!-- Question Markers -->
-                <Image x:Name="Marker1" Source="question_marker.png"
-                       WidthRequest="20" HeightRequest="20"
-                       AbsoluteLayout.LayoutBounds="0,1,20,20"
-                       AbsoluteLayout.LayoutFlags="PositionProportional"/>
-                <Image x:Name="Marker2" Source="question_marker.png"
-                       WidthRequest="20" HeightRequest="20"
-                       AbsoluteLayout.LayoutBounds="0,1,20,20"
-                       AbsoluteLayout.LayoutFlags="PositionProportional"/>
-                <!-- Slider -->
+            <AbsoluteLayout x:Name="MarkerLayout">
+           
                 <Slider x:Name="DurationSlider"
                         IsEnabled="True"
                         MaximumTrackColor="SkyBlue"
@@ -59,20 +50,16 @@
                      Margin="10"
                      CornerRadius="10"
                      VerticalOptions="CenterAndExpand"
-                     HorizontalOptions="CenterAndExpand"   
-                     
+                     HorizontalOptions="CenterAndExpand"                        
                      WidthRequest="{Binding QuestionPopupWidth}"
                      HeightRequest="{Binding QuestionPopupHeight}">
             <StackLayout VerticalOptions="End">
                 <WebView x:Name="QuestionWebView" HeightRequest="{Binding QuestionWebViewPopupHeight}"/>
                 <StackLayout x:Name="OptionsContainer"/>
-                <Label x:Name="CorrectAnswerLabel" IsVisible="False"
-                   FontSize="16" FontAttributes="Bold"
-                   TextColor="Green"/>
+               
             </StackLayout>
         </Frame>
 
-        <!--<Button HorizontalOptions="Start" VerticalOptions="Start"
-                Text="Get Status" Clicked="GetVideoStatus"/>-->
+     
     </Grid>
 </ContentPage>

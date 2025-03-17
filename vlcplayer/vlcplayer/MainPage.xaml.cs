@@ -3,9 +3,13 @@ using LibVLCSharp.Shared;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net.Http;
+using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
+using Newtonsoft.Json;
+using System.Linq;
 
 namespace vlcplayer
 {
@@ -15,14 +19,12 @@ namespace vlcplayer
         MediaPlayer _mediaPlayer;
         VideoView _videoView;
         float _position;
-        private string _videoId = "4a4662c5a313410aa9e52d1e52d1e9ab99aba6";
-
+        private static readonly HttpClient Client = new HttpClient();
 
         private Dictionary<TimeSpan, List<Question>> _questionGroups;
         private Dictionary<TimeSpan, int> _currentQuestionIndex;
-        private TimeSpan group1Time = TimeSpan.FromSeconds(10);
-        private TimeSpan group2Time = TimeSpan.FromSeconds(20);
-
+        private List<int> questionPositions = new List<int>();
+       
         public static readonly BindableProperty QuestionPopupWidthProperty = BindableProperty.Create(nameof(QuestionPopupWidth), typeof(double), typeof(MainPage), 300.0);
         public static readonly BindableProperty QuestionPopupHeigthProperty = BindableProperty.Create(nameof(QuestionPopupHeight), typeof(double), typeof(MainPage), 500.0);
         public static readonly BindableProperty QuestionWebViewPopupHeightProperty = BindableProperty.Create(nameof(QuestionWebViewPopupHeight), typeof(double), typeof(MainPage), 250.0);
@@ -47,7 +49,7 @@ namespace vlcplayer
         {
             InitializeComponent();
             BindingContext = this;
-            LoadQuestions();  // ✅ Load questions at startup
+            _ = LoadQuestionsFromApi();  // ✅ Load questions at startup
             Debug.WriteLine("✅ Questions loaded at startup.");
 
             //Calculate height of the quesiton popup
@@ -133,15 +135,8 @@ namespace vlcplayer
 
             VideoView.MediaPlayer = _mediaPlayer;
             _mediaPlayer.Play();
-            Debug.WriteLine("🎬 Video started playing.");
-
-            StartQuestionCheck();  // ✅ Start checking for questions
-            StartSliderUpdate();
-            Device.StartTimer(TimeSpan.FromMilliseconds(500), () =>
-            {
-                UpdateSliderHighlights();
-                return false;
-            });
+            Debug.WriteLine("🎬 Video started playing.");        
+            Device.BeginInvokeOnMainThread(StartSliderUpdate);
 
         }
         private async void StartSliderUpdate()
@@ -166,23 +161,36 @@ namespace vlcplayer
             }
         }
 
+        //Add quesiton Markers for questions
+        private void SetQuestionMarkers(List<int> questionTime)
+        {
+            questionPositions = questionTime;
+            UpdateSliderHighlights();
+        }
+
         private void UpdateSliderHighlights()
         {
             double sliderWidth = DurationSlider.Width;
             if (sliderWidth > 0 && DurationSlider.Maximum > 0)
             {
-                // Get positions of question times relative to the slider
-                double marker1Pos = (group1Time.TotalSeconds / DurationSlider.Maximum) * 1.3;
-                double marker2Pos = (group2Time.TotalSeconds / DurationSlider.Maximum) * 1.3;
-
-                // Update AbsoluteLayout positions 
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    AbsoluteLayout.SetLayoutBounds(Marker1, new Rectangle(marker1Pos, 0, 20, 15));
-                    AbsoluteLayout.SetLayoutBounds(Marker2, new Rectangle(marker2Pos, 0, 20, 15));
+                    MarkerLayout.Children.Clear();
+                    MarkerLayout.Children.Add(DurationSlider);
+                    foreach (var timeSec in questionPositions)
+                    {
+                        double markerPosition = (timeSec / DurationSlider.Maximum) * 1.15;
 
-                    Marker1.IsVisible = true;
-                    Marker2.IsVisible = true;
+                        Image marker = new Image
+                        {
+                            Source = "question_marker.png",
+                            WidthRequest = 20,
+                            HeightRequest = 20,
+                        };
+                        AbsoluteLayout.SetLayoutBounds(marker, new Rectangle(markerPosition, -0.5, 20, 20));
+                        AbsoluteLayout.SetLayoutFlags(marker, AbsoluteLayoutFlags.PositionProportional);
+                        MarkerLayout.Children.Add(marker);
+                    }
                 });
             }
         }
@@ -228,56 +236,59 @@ namespace vlcplayer
         //    Console.WriteLine(MainGrid.Children);
         //}
 
-        private void LoadQuestions()
+        private async Task LoadQuestionsFromApi()
         {
             _questionGroups = new Dictionary<TimeSpan, List<Question>>();
             _currentQuestionIndex = new Dictionary<TimeSpan, int>();
-
-
-
-            _questionGroups[group1Time] = new List<Question>
-             {
-             new Question
-             {
-                 QuestionText = "<p>What is the <b>capital</b> of France kjsdhfjaskdjbfdamf,fkghlakfngaklgkdfsng lalfjdngadkjgldfbgandfgalgnbfganldfga mfndkg alfgafdg?</p>",
-                 Options = new List<string> { "Paris", "London is the capital of the world and is the world's' responsibility for protecting the environment", "Berlin", "Madrid" },
-                 CorrectAnswer = "Paris"
-             },
-             new Question
-             {
-                 QuestionText ="<p>What is the <b>capital</b> of France?</p><img src='https://cdn.pixabay.com/photo/2025/02/07/18/31/peacock-9390809_1280.jpg' alt='Paris' width='200' height='150' />",
-                 Options = new List<string> { "Brazil", "Germany", "Spain", "Argentina" },
-                 CorrectAnswer = "Germany"
-             },
-             new Question
-             {
-                 QuestionText = "<p>What is the name of the famous painting by <u>Leonardo da Vinci</u>?</p>",
-                 Options = new List<string> { "Mona Lisa", "The Last Supper", "The Starry Night", "The Creation of Adam" },
-                 CorrectAnswer = "Mona Lisa"
-             }
-             };
-
-            _questionGroups[group2Time] = new List<Question>
-             {
-                 new Question
-                 {
-                     QuestionText = "<p>What is the name of the famous painting by <u>Leonardo da Vinci</u>?</p>",
-                     Options = new List<string> { "Joe Biden", "George Osborne", "David Cameron", "Australian Labor Party Leader" },
-                     CorrectAnswer = "David Cameron"
-                 },
-                 new Question
-                 {
-                     QuestionText = "<p>Who won the <i>2018 FIFA World Cup</i>?</p>",
-                     Options = new List<string> { "Stockholm is the biggest capital in the world", "Copenhagen", "London", "Berlin" },
-                     CorrectAnswer = "London"
-                 },
-             };
-
-            foreach (var timestamp in _questionGroups.Keys)
+            string videoId = "4a4662c5a313410a9e52d1e9ab99aba6";
+            string questionUrl = $"https://prolalmsqaenv.azurewebsites.net/webapi/videos/{videoId}/questions";
+            string authToken = $"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkNTdjMzAwZi1lMzdlLTRiNjYtOTcwZS1hMTBiOWI1NTdiOTUiLCJSb2xlIjoiU3R1ZGVudCIsImluc3RJZCI6ImViNmEwYmJjLTk4NGMtNDY3ZS05OWEwLTI0YmQ5M2IwNTBkMiIsInZlciI6IjMiLCJpc3MiOiJodHRwczovL3Byb2xhbG1zcWFlbnYuYXp1cmV3ZWJzaXRlcy5uZXQvIiwiYXVkIjoiaHR0cHM6Ly9wcm9sYWxtc3FhZW52LmF6dXJld2Vic2l0ZXMubmV0LyIsImV4cCI6MTc0MTg1Mjc3MiwibmJmIjoxNzQxODUwOTcyfQ.mNsyKfIeqNJ1_kJZZsezZP9kCBdJUS3A9JnY-SDN3gs";
+            try
             {
-                _currentQuestionIndex[timestamp] = 0;
-                Debug.WriteLine($"📝 Questions added for timestamp {timestamp}: {_questionGroups[timestamp].Count} questions.");
+                using (var request = new HttpRequestMessage(HttpMethod.Get, questionUrl))
+                {
+                    request.Headers.Clear();
+                    request.Headers.Add("Authorization", $"Bearer {authToken}");
+
+                    HttpResponseMessage response = await Client.SendAsync(request);
+                    string responseBody = await response.Content.ReadAsStringAsync();
+
+                    List<ApiQuestion> apiQuestions = JsonConvert.DeserializeObject<List<ApiQuestion>>(responseBody);
+                    foreach (var apiQuestion in apiQuestions)
+                    {
+                        TimeSpan position = TimeSpan.FromSeconds(apiQuestion.PositionSec);
+                        var question = new Question
+                        {
+                            QuestionText = apiQuestion.QuestionText,
+                            Options = new List<Option>()
+                        };
+                        foreach (var option in apiQuestion.AnswerOption)
+                        {
+                            question.Options.Add(new Option
+                            {
+                                OptionText = option.OptionText,
+                                IsCorrect = option.IsCorrect
+                            });
+                        }
+                        if (!_questionGroups.ContainsKey(position))
+                        {
+                            _questionGroups[position] = new List<Question>();
+                            _currentQuestionIndex[position] = 0;
+                        }
+                        _questionGroups[position].Add(question);
+                    }
+                    SetQuestionMarkers(apiQuestions.Select(q=>q.PositionSec).ToList());
+                }
+                Debug.WriteLine($"Questions Loaded :{_questionGroups.Count} timestamps detected.");
+                Device.BeginInvokeOnMainThread(StartQuestionCheck);
             }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"⚠️ Failed to load questions: {ex}");
+            }
+
+
+
         }
 
         private void ShowNextQuestion(TimeSpan timestamp)
@@ -304,69 +315,79 @@ namespace vlcplayer
                 Debug.WriteLine($"🛑 Pausing video and displaying question: {question.QuestionText}");
                 _mediaPlayer.Pause();
 
-                var htmlContent = $@"
-                    <html>
-                    <head>
-                        <style> body {{ font-family: Arial; font-size: 16px; color: black; text-align: center; }} </style>
-                    </head>
-                    <body> {question.QuestionText} </body>
-                    </html>";
-
-                QuestionWebView.Source = new HtmlWebViewSource { Html = htmlContent };
+                QuestionWebView.Source = new HtmlWebViewSource { Html = question.QuestionText };
                 OptionsContainer.Children.Clear();
-                CorrectAnswerLabel.IsVisible = false;
-                CorrectAnswerLabel.Text = "";
 
                 foreach (var option in question.Options)
                 {
-                    Button optionButton = new Button
+                    Label optionLabel = new Label
                     {
-                        Text = option,
-                        FontSize = 16,
+                        Text = HtmlToPlainText(option.OptionText),
+                        FontAttributes = FontAttributes.Bold,
                         BackgroundColor = Color.LightGray,
-                        TextColor = Color.Black
+                        HorizontalTextAlignment = TextAlignment.Center,
+                        VerticalTextAlignment = TextAlignment.Center,
+                        Padding = new Thickness(15)
                     };
-
-                    optionButton.Clicked += async (sender, args) =>
+                    TapGestureRecognizer tapGesture = new TapGestureRecognizer();
+                    tapGesture.Tapped += async (sender, args) =>
                     {
-                        if (option == question.CorrectAnswer)
+                        if (option.IsCorrect)
                         {
-                            Debug.WriteLine("✅ Correct answer selected.");
-                            optionButton.BackgroundColor = Color.Green;
-                            CorrectAnswerLabel.Text = "Correct!";
-                            CorrectAnswerLabel.TextColor = Color.Green;
-                            CorrectAnswerLabel.IsVisible = true;
+                            optionLabel.BackgroundColor = Color.Green;
                             await Task.Delay(2000);
-
                             _currentQuestionIndex[timestamp]++;
                             QuestionPopup.IsVisible = false;
                             ShowNextQuestion(timestamp);
                         }
                         else
                         {
-                            Debug.WriteLine("❌ Incorrect answer selected.");
-                            optionButton.BackgroundColor = Color.Red;
-                            CorrectAnswerLabel.Text = "Wrong! Try again.";
-                            CorrectAnswerLabel.TextColor = Color.Red;
-                            CorrectAnswerLabel.IsVisible = true;
+                            optionLabel.BackgroundColor = Color.Red;
+                            await Task.Delay(1000);
+                            optionLabel.BackgroundColor = Color.LightGray;
                         }
                     };
-
-                    OptionsContainer.Children.Add(optionButton);
+                    optionLabel.GestureRecognizers.Add(tapGesture);
+                    OptionsContainer.Children.Add(optionLabel);
                 }
-
                 QuestionPopup.IsVisible = true;
-                Console.WriteLine("Completed Question Setup");
             });
         }
 
 
+        private string HtmlToPlainText(string html)
+        {
+            var doc = new HtmlAgilityPack.HtmlDocument();
+            doc.LoadHtml(html);
+            return doc.DocumentNode.InnerText;
+        }
+
+    }
+
+    public class ApiQuestion
+    {
+        public string QuestionId { get; set; }
+        public string QuestionText { get; set; }
+        public int PositionSec { get; set; }
+        public List<ApiOption> AnswerOption { get; set; }
+    }
+
+    public class ApiOption
+    {
+        public string OptionId { get; set; }
+        public string OptionText { get; set; }
+        public bool IsCorrect { get; set; }
     }
 
     public class Question
     {
         public string QuestionText { get; set; }
-        public List<string> Options { get; set; }
-        public string CorrectAnswer { get; set; }
+        public List<Option> Options { get; set; }
+    }
+
+    public class Option
+    {
+        public string OptionText { get; set; }
+        public bool IsCorrect { get; set; }
     }
 }
